@@ -343,5 +343,3 @@ def rst2ansi(input_string):
     roles.register_local_role('ansi-' + style, style_role)
 
   return docutils.core.publish_string(input_string, settings_overrides=overrides, writer=Writer())
-
-sys.modules[__name__] = rst2ansi
