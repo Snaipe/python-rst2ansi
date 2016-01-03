@@ -18,7 +18,7 @@ setup(
   version="0.1.0",
   author="Snaipe",
   author_email="franklinmathieu@gmail.com",
-  description="A minecraft server manager",
+  description="A rst converter to ansi-decorated console output",
   license="MIT",
   keywords="rst restructuredtext ansi console code converter",
   url="https://github.com/Snaipe/python-rst-to-ansi",
