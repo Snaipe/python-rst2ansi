@@ -25,10 +25,6 @@ THE SOFTWARE.
 __docformat__ = 'reStructuredText'
 
 import sys
-import os
-import os.path
-import re
-import urllib
 import docutils
 
 from copy import deepcopy, copy
