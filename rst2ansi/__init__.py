@@ -122,8 +122,9 @@ class ANSITranslator(nodes.NodeVisitor):
 
     def __init__(self):
       self.output = ''
-      self.indent_level = 1
+      self.indent_level = 0
       self.in_list = False
+      self.has_title = False
       self.list_counter = 0
 
   class StyleContext(object):
@@ -216,7 +217,15 @@ class ANSITranslator(nodes.NodeVisitor):
 
   def depart_document(self, node):
     self.pop_ctx()
-    self.output = '\n'.join(self.lines)
+    if self.ctx.has_title:
+      self.pop_ctx()
+    remove_last_n = 0
+    for x in self.lines[::-1]:
+      if len(x.strip()) != 0:
+        break
+      remove_last_n += 1
+
+    self.output = '\n'.join(self.lines[:-remove_last_n])
 
   def visit_paragraph(self, node):
     pass
@@ -232,12 +241,11 @@ class ANSITranslator(nodes.NodeVisitor):
     self.newline(1 if self.ctx.in_list else 2)
 
   def visit_title(self, node):
-    self.push_ctx(indent_level = self.ctx.indent_level - 1)
     self.push_style(styles=['bold'])
 
   def depart_title(self, node):
     self.pop_style()
-    self.pop_ctx()
+    self.push_ctx(has_title = True, indent_level = self.ctx.indent_level + 1)
     self.newline(2)
 
   def visit_subtitle(self, node):
@@ -254,10 +262,11 @@ class ANSITranslator(nodes.NodeVisitor):
     pass
 
   def visit_section(self, node):
-    self.push_ctx(indent_level = self.ctx.indent_level + 1)
+    pass
 
   def depart_section(self, node):
-    self.pop_ctx()
+    if self.ctx.has_title:
+      self.pop_ctx()
 
   # Style nodes
 
