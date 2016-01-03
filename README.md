@@ -22,7 +22,7 @@ optional arguments:
 
 ### As a python module:
 
-```bash
+```python
 from rst2ansi import rst2ansi
 
 print(rst2ansi('I **love** reStructuredText!'))
