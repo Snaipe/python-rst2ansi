@@ -39,6 +39,8 @@ from functools import update_wrapper
 from functools import partial
 from types import MethodType
 
+from .table import *
+
 import shutil
 
 COLORS = ('black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white')
@@ -115,7 +117,6 @@ class Writer(writers.Writer):
   def get_transforms(self):
     return writers.Writer.get_transforms(self) + [writer_aux.Admonitions]
 
-
 class ANSITranslator(nodes.NodeVisitor):
 
   class Context(object):
@@ -135,13 +136,15 @@ class ANSITranslator(nodes.NodeVisitor):
       self.fg = ANSICodes.NONE
       self.bg = ANSICodes.NONE
 
-  def __init__(self, document):
+  def __init__(self, document, termsize=None, **options):
     nodes.NodeVisitor.__init__(self, document)
+    self.document = document
     self.output = ''
     self.lines = ['']
     self.line = 0
     self.indent_width = 2
-    self.termsize = shutil.get_terminal_size((80, 20))
+    self.termsize = termsize or shutil.get_terminal_size((80,20))
+    self.options = options
 
     self.ctx = self.Context()
     self.ctx_stack = []
@@ -257,7 +260,7 @@ class ANSITranslator(nodes.NodeVisitor):
 
   def wrap_current_line(self):
     indent = self.ctx.indent_level * self.indent_width
-    sublines = wrap(self.curline, width = self.termsize.columns - indent,
+    sublines = wrap(self.curline, width = self.termsize[0] - indent,
         subsequent_indent = ' ' * indent)
     self.popline()
     self.addlines(sublines, strict=True)
@@ -266,7 +269,8 @@ class ANSITranslator(nodes.NodeVisitor):
     pass
 
   def depart_paragraph(self, node):
-    self.wrap_current_line()
+    if self.options.get('wrap_paragraphs', True):
+      self.wrap_current_line()
     if not self.ctx.in_list:
       self.newline()
 
@@ -352,6 +356,22 @@ class ANSITranslator(nodes.NodeVisitor):
 
   def depart_list_item(self, node):
     self.pop_ctx()
+
+  # Tables
+
+  def visit_table(self, node):
+    props = TableSizeCalculator(self.document)
+    node.walkabout(props)
+
+    writer = TableWriter(props, self.document)
+    node.walkabout(writer)
+    self.addlines(writer.lines)
+
+    # Do not recurse
+    raise nodes.SkipChildren
+
+  def depart_table(self, node):
+    self.newline()
 
   # Misc
 
