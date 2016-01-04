@@ -3,6 +3,18 @@
 A python module dedicated to rendering RST (reStructuredText) documents
 to ansi-escaped strings suitable for display in a terminal.
 
+## Installation
+
+### Requirements
+
+Python 3.3+
+
+### PyPi package
+
+```bash
+pip install rst2ansi
+```
+
 ## Usage
 
 ### As a CLI utility:
