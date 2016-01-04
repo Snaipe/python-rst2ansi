@@ -232,6 +232,15 @@ class ANSITranslator(nodes.NodeVisitor):
       func(self, *args, **kwargs)
     return wrapped
 
+  def strip_empty_lines(self):
+    remove_last_n = 0
+    for x in self.lines[::-1]:
+      if len(x.strip()) != 0:
+        break
+      remove_last_n += 1
+    if remove_last_n != 0:
+      self.lines = self.lines[:-remove_last_n]
+
   # Structural nodes
 
   def visit_document(self, node):
@@ -241,13 +250,7 @@ class ANSITranslator(nodes.NodeVisitor):
     self.pop_ctx()
     if self.ctx.has_title:
       self.pop_ctx()
-    remove_last_n = 0
-    for x in self.lines[::-1]:
-      if len(x.strip()) != 0:
-        break
-      remove_last_n += 1
-    if remove_last_n != 0:
-      self.lines = self.lines[:-remove_last_n]
+    self.strip_empty_lines()
 
     self.output = '\n'.join(self.lines)
 
