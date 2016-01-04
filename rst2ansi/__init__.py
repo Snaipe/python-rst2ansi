@@ -337,6 +337,13 @@ class ANSITranslator(nodes.NodeVisitor):
   def depart_raw(self, node):
     pass
 
+  def __getattr__(self, name):
+    if name.startswith('visit_') or name.startswith('depart_'):
+      def noop(*args, **kwargs):
+        pass
+      return noop
+    raise AttributeError(name)
+
 def rst2ansi(input_string):
 
   overrides = {}
