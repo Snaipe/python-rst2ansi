@@ -191,6 +191,28 @@ class ANSITranslator(nodes.NodeVisitor):
   def nextline(self, n=1):
     self.line += n
 
+  def popline(self):
+    l = self.lines.pop(self.line)
+    self.line -= 1
+    return l
+
+  def replaceline(self, newline, strict=True):
+    if strict:
+      self.lines[self.line] = newline
+    else:
+      self.lines[self.line] = ''
+      self.append(newline)
+
+  def addlines(self, lines, strict=False):
+    if strict:
+      self.lines.extend(lines)
+      self.line += len(lines)
+      self.newline()
+    else:
+      for l in lines:
+        self.append(l)
+        self.newline()
+
   def _restyle(self, reset=False):
     if reset:
       self.append(ANSICodes.RESET)
@@ -231,14 +253,13 @@ class ANSITranslator(nodes.NodeVisitor):
     pass
 
   def depart_paragraph(self, node):
-    line = self.lines[self.line]
     indent = self.ctx.indent_level * self.indent_width
-    sublines = wrap(line, width = self.termsize.columns - indent, 
+    sublines = wrap(self.curline, width = self.termsize.columns - indent,
         subsequent_indent = ' ' * indent)
-    self.lines.pop()
-    self.lines.extend(sublines)
-    self.line += len(sublines) - 1
-    self.newline(1 if self.ctx.in_list else 2)
+    self.popline()
+    self.addlines(sublines, strict=True)
+    if not self.ctx.in_list:
+      self.newline()
 
   def visit_title(self, node):
     self.push_style(styles=['bold'])
@@ -342,6 +363,8 @@ class ANSITranslator(nodes.NodeVisitor):
       def noop(*args, **kwargs):
         pass
       return noop
+    if name == 'curline':
+      return self.lines[self.line]
     raise AttributeError(name)
 
 def rst2ansi(input_string):
