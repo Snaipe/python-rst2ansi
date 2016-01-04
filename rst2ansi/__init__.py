@@ -126,6 +126,7 @@ class ANSITranslator(nodes.NodeVisitor):
       self.in_list = False
       self.has_title = False
       self.list_counter = 0
+      self.node_type = ''
 
   class StyleContext(object):
 
@@ -254,15 +255,18 @@ class ANSITranslator(nodes.NodeVisitor):
 
     self.output = '\n'.join(self.lines)
 
-  def visit_paragraph(self, node):
-    pass
-
-  def depart_paragraph(self, node):
+  def wrap_current_line(self):
     indent = self.ctx.indent_level * self.indent_width
     sublines = wrap(self.curline, width = self.termsize.columns - indent,
         subsequent_indent = ' ' * indent)
     self.popline()
     self.addlines(sublines, strict=True)
+
+  def visit_paragraph(self, node):
+    pass
+
+  def depart_paragraph(self, node):
+    self.wrap_current_line()
     if not self.ctx.in_list:
       self.newline()
 
@@ -372,6 +376,21 @@ class ANSITranslator(nodes.NodeVisitor):
     self.newline()
     self.addlines(sublines[1:])
     self.newline()
+
+  def depart_line(self, node):
+    if len(self.curline.strip()) == 0:
+      self.newline()
+    else:
+      self.wrap_current_line()
+
+  def visit_line_block(self, node):
+    indent = self.ctx.indent_level + (1 if self.ctx.node_type == 'line_block' else 0)
+    self.push_ctx(indent_level = indent, node_type = 'line_block')
+
+  def depart_line_block(self, node):
+    self.pop_ctx()
+    if self.ctx.node_type != 'line_block':
+      self.newline()
 
   def __getattr__(self, name):
     if name.startswith('visit_') or name.startswith('depart_'):
