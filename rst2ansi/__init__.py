@@ -358,6 +358,16 @@ class ANSITranslator(nodes.NodeVisitor):
   def depart_raw(self, node):
     pass
 
+  def visit_literal_block(self, node):
+    pass
+
+  def depart_literal_block(self, node):
+    sublines = self.curline.split('\n')
+    self.replaceline(sublines[0])
+    self.newline()
+    self.addlines(sublines[1:])
+    self.newline()
+
   def __getattr__(self, name):
     if name.startswith('visit_') or name.startswith('depart_'):
       def noop(*args, **kwargs):
