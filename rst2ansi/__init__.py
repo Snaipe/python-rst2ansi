@@ -246,8 +246,10 @@ class ANSITranslator(nodes.NodeVisitor):
       if len(x.strip()) != 0:
         break
       remove_last_n += 1
+    if remove_last_n != 0:
+      self.lines = self.lines[:-remove_last_n]
 
-    self.output = '\n'.join(self.lines[:-remove_last_n])
+    self.output = '\n'.join(self.lines)
 
   def visit_paragraph(self, node):
     pass
