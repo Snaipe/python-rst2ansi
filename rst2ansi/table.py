@@ -55,7 +55,6 @@ class CellHeightCalculator(nodes.NodeVisitor):
   def __getattr__(self, name):
     if name.startswith('visit_') or name.startswith('depart_'):
       def noop(*args, **kwargs):
-        print(args)
         pass
       return noop
     raise AttributeError(name)
