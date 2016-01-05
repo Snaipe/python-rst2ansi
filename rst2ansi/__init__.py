@@ -435,4 +435,5 @@ def rst2ansi(input_string):
   for style in STYLES:
     roles.register_local_role('ansi-' + style, style_role)
 
-  return docutils.core.publish_string(input_string, settings_overrides=overrides, writer=Writer())
+  out = docutils.core.publish_string(input_string, settings_overrides=overrides, writer=Writer())
+  return out.decode('utf-8')

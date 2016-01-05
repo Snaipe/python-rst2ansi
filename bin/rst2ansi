@@ -10,7 +10,7 @@ parser.add_argument('file', type=str, nargs='?', help='A path to the file to ope
 args = parser.parse_args()
 
 def process_file(f):
-  print(rst2ansi(f.read()).decode('utf-8'))
+  print(rst2ansi(f.read()))
 
 if args.file:
   with open(args.file, 'r') as f:

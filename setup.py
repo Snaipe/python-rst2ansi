@@ -15,7 +15,7 @@ if sys.version_info < (3, 3, 0):
 
 setup(
   name="rst2ansi",
-  version="0.1.0",
+  version="0.1.2",
   author="Snaipe",
   author_email="franklinmathieu@gmail.com",
   description="A rst converter to ansi-decorated console output",
