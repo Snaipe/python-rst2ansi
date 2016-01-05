@@ -242,16 +242,17 @@ class TableWriter(nodes.NodeVisitor):
 
     from rst2ansi import ANSITranslator
 
-    v = ANSITranslator(self.document, termsize=(width - 2, height))
-    node.children[0].walkabout(v)
-    v.strip_empty_lines()
-    i = 1
-    for l in v.lines:
-      for sl in l.split('\n'):
-        line = self.lines[self.line + i]
-        line = line[:self.cursor + 2] + sl + line[self.cursor + 2 + len(sl):]
-        self.lines[self.line + i] = line
-        i += 1
+    if node.children:
+      v = ANSITranslator(self.document, termsize=(width - 2, height))
+      node.children[0].walkabout(v)
+      v.strip_empty_lines()
+      i = 1
+      for l in v.lines:
+        for sl in l.split('\n'):
+          line = self.lines[self.line + i]
+          line = line[:self.cursor + 2] + sl + line[self.cursor + 2 + len(sl):]
+          self.lines[self.line + i] = line
+          i += 1
 
     self.col += cols
     self.cursor += width + 1
