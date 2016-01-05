@@ -24,6 +24,43 @@ THE SOFTWARE.
 
 from docutils import nodes
 
+from textwrap import wrap
+
+class CellHeightCalculator(nodes.NodeVisitor):
+
+  def __init__(self, document, cols, rows, width):
+    nodes.NodeVisitor.__init__(self, document)
+    self.cols = cols
+    self.rows = rows
+    self.width = width
+    self.height = 0
+
+  def visit_paragraph(self, node):
+    sublines = wrap(node.astext(), width = self.width)
+    self.height = int(len(sublines) / self.rows)
+    raise nodes.StopTraversal
+
+  def visit_table(self, node):
+    c = TableSizeCalculator(self.document)
+    node.walkabout(c)
+    self.height = int(c.height / self.rows)
+    raise nodes.StopTraversal
+
+  def visit_literal_block(self, node):
+    self.height = int(len(node.astext().split('\n')) / self.rows)
+    raise nodes.StopTraversal
+
+  visit_Text = visit_literal_block
+
+  def __getattr__(self, name):
+    if name.startswith('visit_') or name.startswith('depart_'):
+      def noop(*args, **kwargs):
+        print(args)
+        pass
+      return noop
+    raise AttributeError(name)
+
+
 class TableSizeCalculator(nodes.NodeVisitor):
 
   def __init__(self, document):
@@ -59,9 +96,18 @@ class TableSizeCalculator(nodes.NodeVisitor):
   def visit_row(self, node):
     self.rows += 1
     self.heights.append(1)
+    self.col = 0
 
   def visit_entry(self, node):
-    self.heights[-1] = max(self.heights[-1], len(node.astext().split('\n')))
+    cols = node.attributes.get('morecols', 0) + 1
+    rows = node.attributes.get('morerows', 0) + 1
+    width = sum(self.widths[self.col:self.col + cols]) + (cols - 1)
+
+    c = CellHeightCalculator(self.document, cols, rows, width)
+    node.walkabout(c)
+
+    self.heights[-1] = max(self.heights[-1], c.height)
+    self.col += 1
     raise nodes.SkipChildren
 
 class TableDrawer(nodes.NodeVisitor):
