@@ -22,32 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-__docformat__ = 'reStructuredText'
-
-import sys
-import docutils
-
-from docutils import core, frontend, nodes, utils, writers, languages, io
-from docutils.utils.error_reporting import SafeString
-from docutils.transforms import writer_aux
-from docutils.parsers.rst import roles
-
-from .visitor import Writer
-from .ansi import COLORS, STYLES
-
-def rst2ansi(input_string):
-
-  overrides = {}
-  overrides['input_encoding'] = 'unicode'
-
-  def style_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
-    return [nodes.TextElement(rawtext, text, classes=[name])], []
-
-  for color in COLORS:
-    roles.register_local_role('ansi-fg-' + color, style_role)
-    roles.register_local_role('ansi-bg-' + color, style_role)
-  for style in STYLES:
-    roles.register_local_role('ansi-' + style, style_role)
-
-  out = docutils.core.publish_string(input_string, settings_overrides=overrides, writer=Writer())
-  return out.decode('utf-8')
+def npartial(func, *args, **kwargs):
+  """
+  Returns a partial node visitor function
+  """
+  def wrapped(self, node):
+    func(self, *args, **kwargs)
+  return wrapped

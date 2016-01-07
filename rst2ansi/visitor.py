@@ -22,32 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-__docformat__ = 'reStructuredText'
-
-import sys
-import docutils
-
 from docutils import core, frontend, nodes, utils, writers, languages, io
 from docutils.utils.error_reporting import SafeString
 from docutils.transforms import writer_aux
 from docutils.parsers.rst import roles
 
-from .visitor import Writer
-from .ansi import COLORS, STYLES
+from .ansi import ANSITranslator
 
-def rst2ansi(input_string):
+class Writer(writers.Writer):
 
-  overrides = {}
-  overrides['input_encoding'] = 'unicode'
+  def __init__(self):
+    writers.Writer.__init__(self)
+    self.translator_class = ANSITranslator
 
-  def style_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
-    return [nodes.TextElement(rawtext, text, classes=[name])], []
+  def translate(self):
+    visitor = self.translator_class(self.document)
+    self.document.walkabout(visitor)
+    self.output = visitor.output
 
-  for color in COLORS:
-    roles.register_local_role('ansi-fg-' + color, style_role)
-    roles.register_local_role('ansi-bg-' + color, style_role)
-  for style in STYLES:
-    roles.register_local_role('ansi-' + style, style_role)
+  def get_transforms(self):
+    return writers.Writer.get_transforms(self) + [writer_aux.Admonitions]
 
-  out = docutils.core.publish_string(input_string, settings_overrides=overrides, writer=Writer())
-  return out.decode('utf-8')

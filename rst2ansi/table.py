@@ -240,7 +240,7 @@ class TableWriter(nodes.NodeVisitor):
     width = sum(self.props.widths[self.col:self.col + cols]) + (cols - 1)
     height = sum(self.props.heights[self.row:self.row + rows]) + (rows - 1)
 
-    from rst2ansi import ANSITranslator
+    from .ansi import ANSITranslator
 
     if node.children:
       v = ANSITranslator(self.document, termsize=(width - 2, height))
