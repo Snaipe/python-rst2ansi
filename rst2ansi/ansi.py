@@ -315,6 +315,10 @@ class ANSITranslator(nodes.NodeVisitor):
 
   # Misc
 
+  def depart_admonition(self, node):
+    if self.ctx.has_title:
+      self.pop_ctx()
+
   def visit_block_quote(self, node):
     self.push_ctx(indent_level = self.ctx.indent_level + 1)
 
