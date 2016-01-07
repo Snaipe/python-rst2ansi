@@ -268,6 +268,9 @@ class ANSITranslator(nodes.NodeVisitor):
   def depart_TextElement(self, node):
     self.pop_style()
 
+  visit_inline = visit_TextElement
+  depart_inline = depart_TextElement
+
   # Lists
 
   def visit_enumerated_list(self, node):
