@@ -30,10 +30,6 @@ from docutils.parsers.rst import roles
 from copy import deepcopy, copy
 from textwrap import wrap
 
-from functools import update_wrapper
-from functools import partial
-from types import MethodType
-
 from .table import *
 
 import shutil
@@ -74,29 +70,11 @@ class ANSICodes(object):
     raise Exception('Invalid style "%s"' % code)
 
   @staticmethod
-  def codes_for(fg=None, bg=None, styles=None):
-    out = []
-
-    if fg:
-      out.append(ANSICodes.get_color_code(fg, True))
-
-    if bg:
-      out.append(ANSICodes.get_color_code(bg, False))
-
-    if styles:
-      out += [ANSICodes.get_style_code(s) for s in styles]
-
-    return out
-
-  @staticmethod
   def to_ansi(codes):
     return '\x1b[' + ';'.join(codes) + 'm'
 
   NONE = '0'
   RESET = to_ansi.__func__(NONE)
-
-  BOLD = get_style_code.__func__('bold')
-  ITALIC = get_style_code.__func__('italic')
 
 from .functional import npartial
 
@@ -205,9 +183,9 @@ class ANSITranslator(nodes.NodeVisitor):
       self.append(ANSICodes.RESET)
 
     styles = list(self.style.styles)
-    if self.style.fg != '0':
+    if self.style.fg != ANSICodes.NONE:
       styles.append(self.style.fg)
-    if self.style.bg != '0':
+    if self.style.bg != ANSICodes.NONE:
       styles.append(self.style.bg)
 
     if styles:

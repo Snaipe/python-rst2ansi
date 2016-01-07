@@ -22,14 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-__docformat__ = 'reStructuredText'
-
-import sys
-import docutils
-
-from docutils import core, frontend, nodes, utils, writers, languages, io
-from docutils.utils.error_reporting import SafeString
-from docutils.transforms import writer_aux
+from docutils import nodes, core
 from docutils.parsers.rst import roles
 
 from .visitor import Writer
@@ -49,5 +42,5 @@ def rst2ansi(input_string):
   for style in STYLES:
     roles.register_local_role('ansi-' + style, style_role)
 
-  out = docutils.core.publish_string(input_string, settings_overrides=overrides, writer=Writer())
+  out = core.publish_string(input_string, settings_overrides=overrides, writer=Writer())
   return out.decode('utf-8')
