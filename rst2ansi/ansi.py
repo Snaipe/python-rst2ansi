@@ -35,7 +35,7 @@ from .table import *
 import shutil
 
 COLORS = ('black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white')
-STYLES = ('bold', 'dim', 'italic', 'underline', 'blink', 'blink-fast', 'inverse', 'strikethrough', 'crossed')
+STYLES = ('bold', 'dim', 'italic', 'underline', 'blink', 'blink-fast', 'inverse', 'conceal', 'strikethrough')
 
 class ANSICodes(object):
 
