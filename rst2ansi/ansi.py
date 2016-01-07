@@ -139,8 +139,8 @@ class ANSITranslator(nodes.NodeVisitor):
             not self.style.styles
     self._restyle(reset)
 
-  def append(self, *args):
-    if len(self.lines[self.line]) == 0:
+  def append(self, *args, strict=False):
+    if len(self.lines[self.line]) == 0 and not strict:
       self.lines[self.line] += ' ' * self.ctx.indent_level * self.indent_width
 
     for a in args:
@@ -294,7 +294,7 @@ class ANSITranslator(nodes.NodeVisitor):
       self.append(str(self.ctx.list_counter) + '. ')
       self.ctx.list_counter += 1
     else:
-      self.append('* ')
+      self.append('• ' if self.options['unicode'] else '* ')
     self.push_ctx(indent_level = self.ctx.indent_level + 1)
 
   def depart_list_item(self, node):
@@ -306,7 +306,7 @@ class ANSITranslator(nodes.NodeVisitor):
     props = TableSizeCalculator(self.document)
     node.walkabout(props)
 
-    writer = TableWriter(props, self.document)
+    writer = TableWriter(props, self.document, **self.options)
     node.walkabout(writer)
     self.addlines(writer.lines)
 

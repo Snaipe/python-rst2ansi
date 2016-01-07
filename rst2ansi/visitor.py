@@ -31,12 +31,13 @@ from .ansi import ANSITranslator
 
 class Writer(writers.Writer):
 
-  def __init__(self):
+  def __init__(self, **options):
     writers.Writer.__init__(self)
     self.translator_class = ANSITranslator
+    self.options = options
 
   def translate(self):
-    visitor = self.translator_class(self.document)
+    visitor = self.translator_class(self.document, **self.options)
     self.document.walkabout(visitor)
     self.output = visitor.output
 

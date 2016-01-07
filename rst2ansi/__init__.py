@@ -28,7 +28,7 @@ from docutils.parsers.rst import roles
 from .visitor import Writer
 from .ansi import COLORS, STYLES
 
-def rst2ansi(input_string):
+def rst2ansi(input_string, output_encoding='utf-8'):
 
   overrides = {}
   overrides['input_encoding'] = 'unicode'
@@ -42,5 +42,5 @@ def rst2ansi(input_string):
   for style in STYLES:
     roles.register_local_role('ansi-' + style, style_role)
 
-  out = core.publish_string(input_string, settings_overrides=overrides, writer=Writer())
-  return out.decode('utf-8')
+  out = core.publish_string(input_string, settings_overrides=overrides, writer=Writer(unicode=output_encoding.startswith('utf')))
+  return out.decode(output_encoding)

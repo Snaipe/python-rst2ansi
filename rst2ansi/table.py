@@ -123,7 +123,7 @@ class TableSizeCalculator(nodes.NodeVisitor):
 
 class TableDrawer(nodes.NodeVisitor):
 
-  def __init__(self, props, document):
+  def __init__(self, props, document, **options):
     nodes.NodeVisitor.__init__(self, document)
     self.props = props
     self.level = 0
@@ -133,6 +133,46 @@ class TableDrawer(nodes.NodeVisitor):
     self.col = 0
     self.row = 0
     self.nb_rows = 0
+    self.options = options
+
+    def unicode_intersection(char, next):
+      switch = {
+          ('─', '│'): '┬',
+          ('┐', '│'): '┐',
+          ('┘', '│'): '┤',
+          ('┘', '─'): '┴',
+          ('┴', '│'): '┼',
+          ('│', '─'): '├',
+          ('┤', '─'): '┼',
+          (' ', '─'): '┘',
+          ('└', '─'): '└',
+
+          ('═', '│'): '╤',
+          ('╕', '│'): '╕',
+          ('╛', '│'): '╡',
+          ('╛', '═'): '╧',
+          ('╧', '│'): '╪',
+          ('│', '═'): '╞',
+          ('╡', '═'): '╪',
+          (' ', '═'): '╛',
+          ('╘', '═'): '╘',
+        }
+      return switch[(char, next)]
+
+    if options.get('unicode', False):
+      self.char_single_rule = '─'
+      self.char_double_rule = '═'
+      self.char_vertical_rule = '│'
+      self.get_intersection = unicode_intersection
+      self.top_left = '┌'
+      self.top_right = '┐'
+      self.bottom_left = '╘'
+    else:
+      self.char_single_rule = '-'
+      self.char_double_rule = '='
+      self.char_vertical_rule = '|'
+      self.get_intersection = lambda *args: '+'
+      self.top_left = self.bottom_left = self.top_right = '+'
 
   def __getattr__(self, name):
     if name.startswith('visit_') or name.startswith('depart_'):
@@ -144,8 +184,9 @@ class TableDrawer(nodes.NodeVisitor):
     raise AttributeError(name)
 
   def _draw_rule(self):
-    self.lines[self.line] += '+' + '-' * (self.props.width - 1)
-    self.lines.extend(['|' + ' ' * (self.props.width - 1)] * (self.props.height - 1))
+    self.lines[self.line] += self.top_left + self.char_single_rule * (self.props.width - 2) + self.top_right
+    self.lines.extend([self.char_vertical_rule + ' ' * (self.props.width - 1)] * (self.props.height - 2))
+    self.lines.extend([self.bottom_left + ' ' * (self.props.width - 1)])
     self.line += 1
     self.cursor = 0
 
@@ -180,13 +221,15 @@ class TableDrawer(nodes.NodeVisitor):
     width = sum(self.props.widths[self.col:self.col + cols]) + (cols - 1)
     height = sum(self.props.heights[self.row:self.row + rows]) + (rows - 1)
 
-    rule = '=' if self.local_row + rows - 1 == self.nb_rows - 1 else '-'
-    sep = '|'
+    rule = self.char_double_rule if self.local_row + rows - 1 == self.nb_rows - 1 else self.char_single_rule
+    sep = self.char_vertical_rule
 
     # Draw the horizontal rule
 
     line = self.lines[self.line + height]
-    line = line[:self.cursor] + '+' + (width * rule) + '+' + line[self.cursor + width + 2:]
+    int1 = self.get_intersection(line[self.cursor], rule)
+    int2 = self.get_intersection(line[self.cursor + width + 1], rule)
+    line = line[:self.cursor] + int1 + (width * rule) + int2 + line[self.cursor + width + 2:]
     self.lines[self.line + height] = line
 
     # Draw the vertical rule
@@ -197,7 +240,8 @@ class TableDrawer(nodes.NodeVisitor):
       self.lines[self.line + i] = line
 
     line = self.lines[self.line - 1]
-    line = line[:self.cursor + width + 1] + '+' + line[self.cursor + width + 2:]
+    int3 = self.get_intersection(line[self.cursor + width + 1], sep)
+    line = line[:self.cursor + width + 1] + int3 + line[self.cursor + width + 2:]
     self.lines[self.line - 1] = line
 
     self.col += cols
@@ -208,7 +252,7 @@ class TableDrawer(nodes.NodeVisitor):
 
 class TableWriter(nodes.NodeVisitor):
 
-  def __init__(self, props, document):
+  def __init__(self, props, document, **options):
     nodes.NodeVisitor.__init__(self, document)
     self.props = props
     self.level = 0
@@ -217,6 +261,7 @@ class TableWriter(nodes.NodeVisitor):
     self.col = 0
     self.row = 0
     self.nb_rows = 0
+    self.options = options
 
   def __getattr__(self, name):
     if name.startswith('visit_') or name.startswith('depart_'):
@@ -226,7 +271,7 @@ class TableWriter(nodes.NodeVisitor):
     raise AttributeError(name)
 
   def visit_table(self, node):
-    drawer = TableDrawer(self.props, self.document)
+    drawer = TableDrawer(self.props, self.document, **self.options)
     node.walkabout(drawer)
     self.lines = drawer.lines
 
@@ -255,7 +300,7 @@ class TableWriter(nodes.NodeVisitor):
     from .ansi import ANSITranslator
 
     if node.children:
-      v = ANSITranslator(self.document, termsize=(width - 2, height))
+      v = ANSITranslator(self.document, termsize=(width - 2, height), **self.options)
       node.children[0].walkabout(v)
       v.strip_empty_lines()
       i = 1
