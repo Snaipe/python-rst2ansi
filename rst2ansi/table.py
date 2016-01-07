@@ -26,7 +26,7 @@ from docutils import nodes
 
 from textwrap import wrap
 
-class CellHeightCalculator(nodes.NodeVisitor):
+class CellDimCalculator(nodes.NodeVisitor):
 
   def __init__(self, document, cols, rows, width):
     nodes.NodeVisitor.__init__(self, document)
@@ -36,6 +36,14 @@ class CellHeightCalculator(nodes.NodeVisitor):
     self.height = 0
 
   def visit_paragraph(self, node):
+    first_line = node.astext().split('\n')[0]
+
+    # handle weird table sizing from simple rst tables
+    # disregard cells spanning multiple columns, as
+    # these don't contribute to the cell width calculation
+    if len(first_line) >= self.width:
+        self.width = len(first_line) + 2
+
     sublines = wrap(node.astext(), width = self.width)
     self.height = int(len(sublines) / self.rows)
     raise nodes.StopTraversal
@@ -90,7 +98,7 @@ class TableSizeCalculator(nodes.NodeVisitor):
     self.cols = node.attributes['cols']
 
   def visit_colspec(self, node):
-    self.widths.append(node.attributes['colwidth'] + 2)
+    self.widths.append(node.attributes['colwidth'])
 
   def visit_row(self, node):
     self.rows += 1
@@ -102,8 +110,12 @@ class TableSizeCalculator(nodes.NodeVisitor):
     rows = node.attributes.get('morerows', 0) + 1
     width = sum(self.widths[self.col:self.col + cols]) + (cols - 1)
 
-    c = CellHeightCalculator(self.document, cols, rows, width)
+    c = CellDimCalculator(self.document, cols, rows, width)
     node.walkabout(c)
+
+    # Correct invalid column sizing for simple rst tables
+    if c.width > width and cols == 1:
+        self.widths[self.col] = c.width
 
     self.heights[-1] = max(self.heights[-1], c.height)
     self.col += 1
