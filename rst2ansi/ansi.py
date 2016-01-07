@@ -315,6 +315,9 @@ class ANSITranslator(nodes.NodeVisitor):
 
   # Misc
 
+  def visit_comment(self, node):
+    raise nodes.SkipChildren
+
   def depart_admonition(self, node):
     if self.ctx.has_title:
       self.pop_ctx()
