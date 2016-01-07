@@ -248,6 +248,12 @@ class ANSITranslator(nodes.NodeVisitor):
     if self.ctx.has_title:
       self.pop_ctx()
 
+  def depart_transition(self, node):
+    indent = (self.ctx.indent_level + 2) * self.indent_width
+    char = '╌' if self.options['unicode'] else '-'
+    self.append(' ' * indent + char * (self.termsize[0] - 2 * indent) + ' ' * indent, strict=True)
+    self.newline(2)
+
   # Style nodes
 
   visit_strong = npartial(push_style, styles=['bold'])
