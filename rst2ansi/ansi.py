@@ -209,6 +209,9 @@ class ANSITranslator(nodes.NodeVisitor):
     self.push_ctx()
 
   def _print_references(self):
+    if not self.references:
+      return
+
     self.push_style(styles = ['bold'])
     self.append('References:')
     self.pop_style()
