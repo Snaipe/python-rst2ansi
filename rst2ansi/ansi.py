@@ -208,7 +208,7 @@ class ANSITranslator(nodes.NodeVisitor):
   def visit_document(self, node):
     self.push_ctx()
 
-  def depart_document(self, node):
+  def _print_references(self):
     self.push_style(styles = ['bold'])
     self.append('References:')
     self.pop_style()
@@ -225,6 +225,8 @@ class ANSITranslator(nodes.NodeVisitor):
     self.references = []
     self.pop_ctx()
 
+  def depart_document(self, node):
+    self._print_references()
     self.depart_section(node)
 
     self.pop_ctx()
