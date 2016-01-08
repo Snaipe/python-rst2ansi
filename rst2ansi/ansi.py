@@ -31,6 +31,7 @@ from copy import deepcopy, copy
 from textwrap import wrap
 
 from .table import *
+from .unicode import ref_to_unicode
 
 import shutil
 
@@ -106,6 +107,8 @@ class ANSITranslator(nodes.NodeVisitor):
     self.indent_width = 2
     self.termsize = termsize or shutil.get_terminal_size((80,20))
     self.options = options
+    self.references = []
+    self.refcount = 0
 
     self.ctx = self.Context()
     self.ctx_stack = []
@@ -206,9 +209,25 @@ class ANSITranslator(nodes.NodeVisitor):
     self.push_ctx()
 
   def depart_document(self, node):
+    self.push_style(styles = ['bold'])
+    self.append('References:')
+    self.pop_style()
+    self.newline(2)
+
+    self.push_ctx(indent_level = self.ctx.indent_level + 1)
+    for ref in self.references:
+      self.append('[%s]: <' % ref[0])
+      self.push_style(fg = 'cyan', styles = ['underline'])
+      self.append(ref[1])
+      self.pop_style()
+      self.append('>')
+      self.newline()
+    self.references = []
     self.pop_ctx()
-    if self.ctx.has_title:
-      self.pop_ctx()
+
+    self.depart_section(node)
+
+    self.pop_ctx()
     self.strip_empty_lines()
 
     self.output = '\n'.join(self.lines)
@@ -253,6 +272,23 @@ class ANSITranslator(nodes.NodeVisitor):
     char = '╌' if self.options['unicode'] else '-'
     self.append(' ' * indent + char * (self.termsize[0] - 2 * indent) + ' ' * indent, strict=True)
     self.newline(2)
+
+  def visit_reference(self, node):
+    if node.attributes['refuri'] == node.astext().strip():
+      self.append('<')
+    self.push_style(fg = 'cyan', styles = ['underline'])
+
+  def depart_reference(self, node):
+    self.pop_style()
+    if node.attributes['refuri'] == node.astext().strip():
+      self.append('>')
+    else:
+      self.references.append((self.refcount, node.attributes['refuri']))
+      if self.options['unicode'] and self.options.get('unicode_superscript', False):
+        self.append(ref_to_unicode(self.refcount))
+      else:
+        self.append(' [%s]' % self.refcount)
+      self.refcount += 1
 
   # Style nodes
 
