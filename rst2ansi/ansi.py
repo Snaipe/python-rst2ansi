@@ -28,9 +28,9 @@ from docutils.transforms import writer_aux
 from docutils.parsers.rst import roles
 
 from copy import deepcopy, copy
-from textwrap import wrap
+from .wrap import wrap
 
-from .table import *
+from .table import TableSizeCalculator, TableWriter
 from .unicode import ref_to_unicode
 
 import shutil
