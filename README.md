@@ -3,6 +3,8 @@
 A python module dedicated to rendering RST (reStructuredText) documents
 to ansi-escaped strings suitable for display in a terminal.
 
+[![asciicast](https://asciinema.org/a/drykz69gtn557z3hxnbb1jybq.png)](https://asciinema.org/a/drykz69gtn557z3hxnbb1jybq)
+
 ## Installation
 
 ### Requirements
