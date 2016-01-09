@@ -1,0 +1,35 @@
+language: python
+
+sudo: false
+
+python:
+  - 3.3
+  - 3.4
+  - nightly
+
+matrix:
+  include:
+    - python: 3.5
+      env:
+        DEPLOY: true
+
+  allow_failures:
+    - python: nightly
+
+install: pip install docutils cram
+
+script:
+  - make build
+  - make test
+
+deploy:
+  provider: pypi
+  skip_cleanup: true
+  user: Snaipe
+  password:
+    secure: CjyhyupM4hDysV9FAjB/CmbimFgoMiyN2JvV4sje3mB+iyFAIUp5imDQlW60mbgplrnROXiFyaUpk1OhKCW/Eu6KKnjhQevz/iY/d+Bfk1TnjvsWTNEKU54QAsWxN9AjL92y+e35hN0emFSDd1ZhzWYj+uTJ39zxBsjFmdJS+2xXkhlAdeAblGQkQ9cFRXr2JFTSYDLKTTqSviCzo1iLddl8uPb8fFlESjAyl8AnxrK2d50RC9GW7yz5umox/McjYPhX+VFQ0ITfG/b+wtJveOOoFIUvPKUMxv55sEWUiuMv1ZZ1PPaeXUGkDyvZ0zSoruo8m9ZZlTqUwJdEFuzxlfopod2h86J9fTYD4NKIhgNssO9sqRcgR2sgvNOWQ9wGmZggt3exluHeyL1iBJLU1z0CHDQQXmI3Au41Ziug+O0GokfSTnmCYkMHEkgZtaHj/UINKE9SyNPqEsa+N6KaclImw7+ZI6KUsl38LB2EOU6xouCMe6wBfwnVOmAzvzNH7BAtvu7VcSzyX9ikG4JQIZz73zOnm7Y28ENnsGM18ItRI33lf+D9wNCeff9whH9NTPA7RBrJ4DDP7PC5Mz3em1AlJdkEe360JI6plXZrVffSrpETN2fRAQp0x5fTUO333x1vbWNOW4/bryZ3EEG0VmOFYKcMxv6hL+78esCJuuI=
+  on:
+    repo: Snaipe/python-rst2ansi
+    tags: true
+    distributions: sdist bdist_wheel
+    condition: $DEPLOY = true
