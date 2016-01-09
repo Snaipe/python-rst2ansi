@@ -13,12 +13,16 @@ if sys.version_info < (3, 3, 0):
         % '.'.join(map(str, sys.version_info[:3])))
   sys.exit(1)
 
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 setup(
   name="rst2ansi",
   version="0.1.3",
   author="Snaipe",
   author_email="franklinmathieu@gmail.com",
   description="A rst converter to ansi-decorated console output",
+  long_description=read('README.rst'),
   license="MIT",
   keywords="rst restructuredtext ansi console code converter",
   url="https://github.com/Snaipe/python-rst-to-ansi",
