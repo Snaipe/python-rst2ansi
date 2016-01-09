@@ -278,17 +278,23 @@ class ANSITranslator(nodes.NodeVisitor):
     self.append(' ' * indent + char * (self.termsize[0] - 2 * indent) + ' ' * indent, strict=True)
     self.newline(2)
 
+  def _get_uri(self, node):
+    uri = node.attributes.get('refuri', '')
+    if not uri:
+      uri = node.attributes.get('uri', '')
+    return uri
+
   def visit_reference(self, node):
-    if node.attributes['refuri'] == node.astext().strip():
+    if self._get_uri(node) == node.astext().strip():
       self.append('<')
     self.push_style(fg = 'cyan', styles = ['underline'])
 
   def depart_reference(self, node):
     self.pop_style()
-    if node.attributes['refuri'] == node.astext().strip():
+    if self._get_uri(node) == node.astext().strip():
       self.append('>')
     else:
-      self.references.append((self.refcount, node.attributes['refuri']))
+      self.references.append((self.refcount, self._get_uri(node)))
       if self.options['unicode'] and self.options.get('unicode_superscript', False):
         self.append(ref_to_unicode(self.refcount))
       else:
@@ -364,6 +370,18 @@ class ANSITranslator(nodes.NodeVisitor):
     self.newline()
 
   # Misc
+
+  def depart_image(self, node):
+    if type(node.parent) == nodes.figure:
+      self.visit_reference(node)
+      self.append('[' + node.attributes.get('alt', 'Image') + ']')
+      self.depart_reference(node)
+      self.newline()
+    else:
+      self.append('[' + node.attributes.get('alt', 'Image') + ']')
+
+  def depart_caption(self, node):
+    self.newline(2)
 
   def visit_substitution_definition(self, node):
     raise nodes.SkipChildren

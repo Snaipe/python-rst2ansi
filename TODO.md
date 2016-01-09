@@ -24,9 +24,9 @@ This document describes the TODO list for supporing the full [reStructuredText s
     * [x] Hyperlink Targets
     * [ ] Directives
       * [ ] Admonitions
-      * [ ] Images
-        * [ ] Image
-        * [ ] Figure
+      * [x] Images
+        * [x] Image
+        * [x] Figure
       * [ ] Body Elements
         * [ ] Topic
         * [ ] Sidebar
