@@ -365,6 +365,9 @@ class ANSITranslator(nodes.NodeVisitor):
 
   # Misc
 
+  def visit_substitution_definition(self, node):
+    raise nodes.SkipChildren
+
   def visit_comment(self, node):
     raise nodes.SkipChildren
 

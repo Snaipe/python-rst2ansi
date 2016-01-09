@@ -63,7 +63,7 @@ This document describes the TODO list for supporing the full [reStructuredText s
         * [x] Custom Interpreted Text Roles
         * [x] Setting the Default Interpreted Text Role
         * [ ] Metadata Document Title
-    * [ ] Substitution Definitions
+    * [x] Substitution Definitions
     * [x] Comments
 * [ ] Implicit Hyperlink Targets
 * [ ] Inline Markup
