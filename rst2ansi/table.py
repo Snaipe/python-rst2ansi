@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The MIT License (MIT)
 
@@ -22,9 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+from __future__ import unicode_literals
+
 from docutils import nodes
 
 from textwrap import wrap
+
+from .unicode import u
 
 class CellDimCalculator(nodes.NodeVisitor):
 
@@ -157,7 +162,7 @@ class TableDrawer(nodes.NodeVisitor):
           (' ', '═'): '╛',
           ('╘', '═'): '╘',
         }
-      return switch[(char, next)]
+      return switch[(u(char), u(next))]
 
     if options.get('unicode', False):
       self.char_single_rule = '─'

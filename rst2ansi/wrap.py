@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The MIT License (MIT)
 
@@ -33,21 +34,25 @@ def wrap(text, width=80, subsequent_indent=''):
   words = text.split()
   line_size = 0
   lines = [[]]
-  def nl():
-    nonlocal line_size, lines
-    line_size = len(subsequent_indent)
-    lines.append([])
+  #def nl():
+  #  nonlocal line_size, lines
+  #  line_size = len(subsequent_indent)
+  #  lines.append([])
 
   for w in words:
     size = word_size(w) + 1
     if size == 0:
       continue
     if line_size + size - 1 > width and line_size > width / 2:
-      nl()
+      #nl()
+      line_size = len(subsequent_indent)
+      lines.append([])
     while line_size + size - 1 > width:
       stripped = width - line_size - 1
       lines[-1].append(w[:stripped] + '-')
-      nl()
+      #nl()
+      line_size = len(subsequent_indent)
+      lines.append([])
       w = w[stripped:]
       size -= stripped
     if size == 0:

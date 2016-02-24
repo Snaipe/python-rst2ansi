@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The MIT License (MIT)
 
@@ -22,20 +23,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-def num_to_superscript(n: int):
+from __future__ import unicode_literals
+
+import sys
+
+def num_to_superscript(n):
   sups = {
-    u'0': u'\u2070',
-    u'1': u'\xb9',
-    u'2': u'\xb2',
-    u'3': u'\xb3',
-    u'4': u'\u2074',
-    u'5': u'\u2075',
-    u'6': u'\u2076',
-    u'7': u'\u2077',
-    u'8': u'\u2078',
-    u'9': u'\u2079'
+    '0': '\u2070',
+    '1': '\xb9',
+    '2': '\xb2',
+    '3': '\xb3',
+    '4': '\u2074',
+    '5': '\u2075',
+    '6': '\u2076',
+    '7': '\u2077',
+    '8': '\u2078',
+    '9': '\u2079'
   }
   return ''.join(sups.get(c, c) for c in str(n))
 
-def ref_to_unicode(n: int):
+def ref_to_unicode(n):
   return '⁽' + num_to_superscript(n) + '⁾'
+
+def u(s):
+  # Useful for very coarse version differentiation.
+  PY2 = sys.version_info[0] == 2
+  PY3 = sys.version_info[0] == 3
+  if PY3:
+    return s
+  else:
+    # Workaround for standalone backslash
+    try:
+        ret_s = unicode(s.replace(r'\\', r'\\\\'), "unicode_escape")
+    except TypeError:
+        ret_s = s.replace(r'\\', r'\\\\')
+    return ret_s
