@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The MIT License (MIT)
 
@@ -22,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+from __future__ import unicode_literals
+
 from docutils import core, frontend, nodes, utils, writers, languages, io
 from docutils.utils.error_reporting import SafeString
 from docutils.transforms import writer_aux
@@ -31,7 +34,9 @@ from copy import deepcopy, copy
 from .wrap import wrap
 
 from .table import TableSizeCalculator, TableWriter
-from .unicode import ref_to_unicode
+from .unicode import ref_to_unicode, u
+
+from .get_terminal_size import get_terminal_size
 
 import shutil
 
@@ -105,7 +110,7 @@ class ANSITranslator(nodes.NodeVisitor):
     self.lines = ['']
     self.line = 0
     self.indent_width = 2
-    self.termsize = termsize or shutil.get_terminal_size((80,20))
+    self.termsize = termsize or get_terminal_size((80,20))
     self.options = options
     self.references = []
     self.refcount = 0
@@ -142,12 +147,16 @@ class ANSITranslator(nodes.NodeVisitor):
             not self.style.styles
     self._restyle(reset)
 
-  def append(self, *args, strict=False):
+  def append(self, *args, **kwargs):
+    try:
+      strict = kwargs['strict']
+    except KeyError:
+      strict = False
     if len(self.lines[self.line]) == 0 and not strict:
       self.lines[self.line] += ' ' * self.ctx.indent_level * self.indent_width
 
     for a in args:
-      self.lines[self.line] += str(a)
+      self.lines[self.line] += u(a)
 
   def newline(self, n=1):
     self.lines.extend([''] * n)

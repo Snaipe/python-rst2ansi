@@ -7,12 +7,6 @@ try:
 except ImportError:
   from distutils.core import setup
 
-if sys.version_info < (3, 3, 0):
-  print('This module is not supported on versions lower than python 3.3, sorry !')
-  print('Your version of python is %s, try installing it with a more recent version.'
-        % '.'.join(map(str, sys.version_info[:3])))
-  sys.exit(1)
-
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -37,7 +31,8 @@ setup(
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 2.7",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.3",
     "Programming Language :: Python :: 3.4",
     "Programming Language :: Python :: 3.5",

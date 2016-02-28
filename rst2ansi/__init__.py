@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 The MIT License (MIT)
 
@@ -22,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
+from __future__ import unicode_literals
+
 from docutils import nodes, core
 from docutils.parsers.rst import roles
 
@@ -42,5 +45,5 @@ def rst2ansi(input_string, output_encoding='utf-8'):
   for style in STYLES:
     roles.register_local_role('ansi-' + style, style_role)
 
-  out = core.publish_string(input_string, settings_overrides=overrides, writer=Writer(unicode=output_encoding.startswith('utf')))
+  out = core.publish_string(input_string.decode('utf-8'), settings_overrides=overrides, writer=Writer(unicode=output_encoding.startswith('utf')))
   return out.decode(output_encoding)
