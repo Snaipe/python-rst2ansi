@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
   name="rst2ansi",
-  version="0.1.3",
+  version="0.1.4",
   author="Snaipe",
   author_email="franklinmathieu@gmail.com",
   description="A rst converter to ansi-decorated console output",
