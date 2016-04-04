@@ -362,6 +362,35 @@ class ANSITranslator(nodes.NodeVisitor):
   def depart_list_item(self, node):
     self.pop_ctx()
 
+  visit_definition_list = npartial(push_ctx, in_list=True, list_counter=0)
+  depart_definition_list = npartial(pop_ctx)
+
+  def visit_definition(self, node):
+    self.newline(2)
+    self.push_ctx(indent_level = self.ctx.indent_level + 1)
+
+  def depart_definition(self, node):
+    self.pop_ctx()
+    self.newline()
+
+  visit_option_list = npartial(push_ctx, in_list=True, list_counter=0)
+  depart_option_list = npartial(pop_ctx)
+
+  def depart_option(self, node):
+    self.append(' | ')
+
+  def depart_option_group(self, node):
+    self.replaceline(self.lines[self.line][:-3] + ':', strict=True)
+    self.push_ctx(indent_level = self.ctx.indent_level + 2)
+    self.newline()
+
+  def visit_option_argument(self, node):
+    self.append(' ')
+
+  def depart_option_list_item(self, node):
+    self.pop_ctx()
+    self.newline()
+
   # Tables
 
   def visit_table(self, node):
