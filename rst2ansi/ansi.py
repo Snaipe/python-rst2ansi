@@ -256,9 +256,7 @@ class ANSITranslator(nodes.NodeVisitor):
   def depart_paragraph(self, node):
     if self.options.get('wrap_paragraphs', True):
       self.wrap_current_line()
-      self.newline()
-    if not self.ctx.in_list:
-      self.newline()
+    self.newline()
 
   def visit_title(self, node):
     self.push_style(styles=['bold'])
