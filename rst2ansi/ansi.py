@@ -256,8 +256,7 @@ class ANSITranslator(nodes.NodeVisitor):
   def depart_paragraph(self, node):
     if self.options.get('wrap_paragraphs', True):
       self.wrap_current_line()
-    if not self.ctx.in_list:
-      self.newline()
+    self.newline()
 
   def visit_title(self, node):
     self.push_style(styles=['bold'])
@@ -366,12 +365,11 @@ class ANSITranslator(nodes.NodeVisitor):
   depart_definition_list = npartial(pop_ctx)
 
   def visit_definition(self, node):
-    self.newline(2)
+    self.newline(1)
     self.push_ctx(indent_level = self.ctx.indent_level + 1)
 
   def depart_definition(self, node):
     self.pop_ctx()
-    self.newline()
 
   visit_option_list = npartial(push_ctx, in_list=True, list_counter=0)
   depart_option_list = npartial(pop_ctx)
@@ -389,7 +387,6 @@ class ANSITranslator(nodes.NodeVisitor):
 
   def depart_option_list_item(self, node):
     self.pop_ctx()
-    self.newline()
 
   # Tables
 
