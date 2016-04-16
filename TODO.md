@@ -8,9 +8,9 @@ This document describes the TODO list for supporing the full [reStructuredText s
   * [x] Paragraphs
   * [x] Bullet Lists
   * [x] Enumerated Lists
-  * [ ] Definition Lists
+  * [x] Definition Lists
   * [ ] Field Lists
-  * [ ] Option Lists
+  * [x] Option Lists
   * [x] Literal Blocks
   * [x] Line Blocks
   * [ ] Block Quotes
