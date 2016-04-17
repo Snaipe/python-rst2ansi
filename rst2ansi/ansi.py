@@ -336,7 +336,9 @@ class ANSITranslator(nodes.NodeVisitor):
   # Lists
 
   def visit_enumerated_list(self, node):
-    self.push_ctx(in_list = True, list_counter = 1)
+    strt = node.attributes.get('start', 1)
+    self.push_ctx(in_list = True,
+                  list_counter = strt)
 
   def depart_enumerated_list(self, node):
     self.pop_ctx()
@@ -344,7 +346,8 @@ class ANSITranslator(nodes.NodeVisitor):
       self.newline()
 
   def visit_bullet_list(self, node):
-    self.push_ctx(in_list = True, list_counter = 0)
+    self.push_ctx(in_list = True,
+                  list_counter = 0)
 
   def depart_bullet_list(self, node):
     self.pop_ctx()
@@ -366,12 +369,12 @@ class ANSITranslator(nodes.NodeVisitor):
   depart_definition_list = npartial(pop_ctx)
 
   def visit_definition(self, node):
-    self.newline(2)
+    self.newline()
     self.push_ctx(indent_level = self.ctx.indent_level + 1)
 
   def depart_definition(self, node):
-    self.pop_ctx()
     self.newline()
+    self.pop_ctx()
 
   visit_option_list = npartial(push_ctx, in_list=True, list_counter=0)
   depart_option_list = npartial(pop_ctx)
@@ -380,7 +383,7 @@ class ANSITranslator(nodes.NodeVisitor):
     self.append(' | ')
 
   def depart_option_group(self, node):
-    self.replaceline(self.lines[self.line][:-3] + ':', strict=True)
+    self.replaceline(self.lines[self.line][:-3], strict=True)
     self.push_ctx(indent_level = self.ctx.indent_level + 2)
     self.newline()
 
@@ -389,7 +392,6 @@ class ANSITranslator(nodes.NodeVisitor):
 
   def depart_option_list_item(self, node):
     self.pop_ctx()
-    self.newline()
 
   # Tables
 

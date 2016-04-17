@@ -13,7 +13,10 @@ args = parser.parse_args()
 def process_file(f):
   out = rst2ansi(f.read())
   if out:
-    print(out)
+    try:
+      print(out)
+    except UnicodeEncodeError:
+      print(out.encode('ascii', errors='backslashreplace').decode('ascii'))
 
 if args.file:
   with io.open(args.file, 'rb') as f:
