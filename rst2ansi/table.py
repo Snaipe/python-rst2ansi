@@ -91,7 +91,7 @@ class TableSizeCalculator(nodes.NodeVisitor):
 
   def visit_table(self, node):
     if self.level > 0:
-      raise SkipChildren
+      raise nodes.SkipChildren
     self.level += 1
 
   def depart_table(self, node):
@@ -197,7 +197,7 @@ class TableDrawer(nodes.NodeVisitor):
 
   def visit_table(self, node):
     if self.level > 0:
-      raise SkipChildren
+      raise nodes.SkipChildren
     self.level += 1
     self._draw_rule()
 
