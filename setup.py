@@ -18,7 +18,7 @@ setup(
   keywords="rst restructuredtext ansi console code converter",
   url="https://github.com/Snaipe/python-rst-to-ansi",
   packages=['rst2ansi'],
-  requires=['docutils'],
+  install_requires=['docutils'],
   entry_points = {
     'console_scripts': ['rst2ansi=rst2ansi.__main__:main'],
   },
