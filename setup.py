@@ -22,7 +22,9 @@ setup(
   url="https://github.com/Snaipe/python-rst-to-ansi",
   packages=['rst2ansi'],
   requires=['docutils'],
-  scripts=['bin/rst2ansi'],
+  entry_points = {
+    'console_scripts': ['rst2ansi=rst2ansi.__main__:main'],
+  },
   data_files=[],
   classifiers=[
     "Development Status :: 4 - Beta",
