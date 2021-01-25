@@ -45,5 +45,8 @@ def rst2ansi(input_string, output_encoding='utf-8'):
   for style in STYLES:
     roles.register_local_role('ansi-' + style, style_role)
 
-  out = core.publish_string(input_string.decode('utf-8'), settings_overrides=overrides, writer=Writer(unicode=output_encoding.startswith('utf')))
+  if hasattr(input_string, 'decode'):
+    input_string = input_string.decode('utf-8')
+
+  out = core.publish_string(input_string, settings_overrides=overrides, writer=Writer(unicode=output_encoding.startswith('utf')))
   return out.decode(output_encoding)
