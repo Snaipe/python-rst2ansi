@@ -32,7 +32,6 @@ THE SOFTWARE.
 import os
 import struct
 import sys
-
 from collections import namedtuple
 
 __all__ = ["get_terminal_size"]
@@ -41,7 +40,7 @@ __all__ = ["get_terminal_size"]
 terminal_size = namedtuple("terminal_size", "columns lines")
 
 try:
-    from ctypes import windll, create_string_buffer, WinError
+    from ctypes import WinError, create_string_buffer, windll
 
     _handle_ids = {
         0: -10,
@@ -52,7 +51,7 @@ try:
     def _get_terminal_size(fd):
         handle = windll.kernel32.GetStdHandle(_handle_ids[fd])
         if handle == 0:
-            raise OSError('handle cannot be retrieved')
+            raise OSError("handle cannot be retrieved")
         if handle == -1:
             raise WinError()
         csbi = create_string_buffer(22)
@@ -73,7 +72,7 @@ except ImportError:
     def _get_terminal_size(fd):
         try:
             res = fcntl.ioctl(fd, termios.TIOCGWINSZ, b"\x00" * 4)
-        except IOError as e:
+        except OSError as e:
             raise OSError(e)
         lines, columns = struct.unpack("hh", res)
 
@@ -123,4 +122,3 @@ def get_terminal_size(fallback=(80, 24)):
             lines = size.lines
 
     return terminal_size(columns, lines)
-

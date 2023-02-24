@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 The MIT License (MIT)
 
@@ -23,38 +22,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from __future__ import unicode_literals
 
 import sys
 
+
 def num_to_superscript(n):
-  sups = {
-    '0': '\u2070',
-    '1': '\xb9',
-    '2': '\xb2',
-    '3': '\xb3',
-    '4': '\u2074',
-    '5': '\u2075',
-    '6': '\u2076',
-    '7': '\u2077',
-    '8': '\u2078',
-    '9': '\u2079'
-  }
-  return ''.join(sups.get(c, c) for c in str(n))
+    sups = {
+        "0": "\u2070",
+        "1": "\xb9",
+        "2": "\xb2",
+        "3": "\xb3",
+        "4": "\u2074",
+        "5": "\u2075",
+        "6": "\u2076",
+        "7": "\u2077",
+        "8": "\u2078",
+        "9": "\u2079",
+    }
+    return "".join(sups.get(c, c) for c in str(n))
+
 
 def ref_to_unicode(n):
-  return '⁽' + num_to_superscript(n) + '⁾'
+    return "⁽" + num_to_superscript(n) + "⁾"
+
 
 def u(s):
-  # Useful for very coarse version differentiation.
-  PY2 = sys.version_info[0] == 2
-  PY3 = sys.version_info[0] == 3
-  if PY3:
-    return s
-  else:
+    # Useful for very coarse version differentiation.
+    PY3 = sys.version_info[0] == 3
+    if PY3:
+        return s
     # Workaround for standalone backslash
     try:
-        ret_s = unicode(s.replace(r'\\', r'\\\\'), "unicode_escape")
+        ret_s = s.replace(r"\\", r"\\\\").encode("unicode_escape")
     except TypeError:
-        ret_s = s.replace(r'\\', r'\\\\')
+        ret_s = s.replace(r"\\", r"\\\\")
     return ret_s

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 The MIT License (MIT)
 
@@ -23,30 +22,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from __future__ import unicode_literals
 
-from docutils import nodes, core
+from docutils import core, nodes
 from docutils.parsers.rst import roles
 
-from .visitor import Writer
 from .ansi import COLORS, STYLES
+from .visitor import Writer
 
-def rst2ansi(input_string, output_encoding='utf-8'):
 
-  overrides = {}
-  overrides['input_encoding'] = 'unicode'
+def rst2ansi(input_string, output_encoding="utf-8"):
 
-  def style_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
-    return [nodes.TextElement(rawtext, text, classes=[name])], []
+    overrides = {}
+    overrides["input_encoding"] = "unicode"
 
-  for color in COLORS:
-    roles.register_local_role('ansi-fg-' + color, style_role)
-    roles.register_local_role('ansi-bg-' + color, style_role)
-  for style in STYLES:
-    roles.register_local_role('ansi-' + style, style_role)
+    def style_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+        return [nodes.TextElement(rawtext, text, classes=[name])], []
 
-  if hasattr(input_string, 'decode'):
-    input_string = input_string.decode('utf-8')
+    for color in COLORS:
+        roles.register_local_role("ansi-fg-" + color, style_role)
+        roles.register_local_role("ansi-bg-" + color, style_role)
+    for style in STYLES:
+        roles.register_local_role("ansi-" + style, style_role)
 
-  out = core.publish_string(input_string, settings_overrides=overrides, writer=Writer(unicode=output_encoding.startswith('utf')))
-  return out.decode(output_encoding)
+    if hasattr(input_string, "decode"):
+        input_string = input_string.decode("utf-8")
+
+    out = core.publish_string(
+        input_string,
+        settings_overrides=overrides,
+        writer=Writer(unicode=output_encoding.startswith("utf")),
+    )
+    return out.decode(output_encoding)
