@@ -22,12 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-
 from textwrap import wrap
 
 from docutils import nodes
-
-from .unicode import u
 
 
 class CellDimCalculator(nodes.NodeVisitor):
@@ -141,7 +138,7 @@ class TableDrawer(nodes.NodeVisitor):
         self.nb_rows = 0
         self.options = options
 
-        def unicode_intersection(char, next):
+        def unicode_intersection(char, next_intersection):
             switch = {
                 ("─", "│"): "┬",
                 ("┐", "│"): "┐",
@@ -162,7 +159,7 @@ class TableDrawer(nodes.NodeVisitor):
                 (" ", "═"): "╛",
                 ("╘", "═"): "╘",
             }
-            return switch[(u(char), u(next))]
+            return switch[(char, next_intersection)]
 
         if options.get("unicode", False):
             self.char_single_rule = "─"
@@ -333,15 +330,15 @@ class TableWriter(nodes.NodeVisitor):
             )
             node.children[0].walkabout(v)
             v.strip_empty_lines()
-            i = 1
-            for l in v.lines:
-                for sl in l.split("\n"):
-                    line = self.lines[self.line + i]
+            cnt = 1
+            for line in v.lines:
+                for sl in line.split("\n"):
+                    line = self.lines[self.line + cnt]
                     line = (
                         line[: self.cursor + 2] + sl + line[self.cursor + 2 + len(sl) :]
                     )
-                    self.lines[self.line + i] = line
-                    i += 1
+                    self.lines[self.line + cnt] = line
+                    cnt += 1
 
         self.col += cols
         self.cursor += width + 1

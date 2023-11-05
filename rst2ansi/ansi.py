@@ -22,14 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-
 from copy import deepcopy
+from os import get_terminal_size
 
 from docutils import nodes
 
-from .get_terminal_size import get_terminal_size
+from .functional import npartial
 from .table import TableSizeCalculator, TableWriter
-from .unicode import ref_to_unicode, u
+from .unicode import ref_to_unicode
 from .wrap import wrap
 
 COLORS = ("black", "red", "green", "yellow", "blue", "magenta", "cyan", "white")
@@ -47,45 +47,76 @@ STYLES = (
 
 
 class ANSICodes:
+    """Work with ANSI codes."""
+
     @staticmethod
     def get_color_code(code, fg):
-        FG = 30
-        BG = 40
-        FG_256 = 38
-        BG_256 = 48
+        """Return the ANSI code for a color.
+
+        Parameters
+        ----------
+        code : str, int, tuple, or list
+            The color code. If a string, it must be one of the following:
+            ``black``, ``red``, ``green``, ``yellow``, ``blue``, ``magenta``,
+            ``cyan``, ``white``. If an integer, it must be between 0 and 255.
+            If a tuple or list, it must be a 3-tuple of integers between 0 and
+            255.
+        fg : bool
+            Whether to return a foreground or background color code.
+        """
+        fgc_256 = 38
+        bgc_256 = 48
 
         if code in COLORS:
-            shift = FG if fg else BG
+            fgc = 30
+            bgc = 40
+            shift = fgc if fg else bgc
             return str(shift + COLORS.index(code))
-        elif isinstance(code, int) and 0 <= code <= 255:
-            shift = FG_256 if fg else BG_256
-            return str(shift) + ";5;%d" % int(code)
-        elif not isinstance(code, str) and hasattr(code, "__len__") and len(code) == 3:
+
+        if isinstance(code, int) and 0 <= code <= 255:
+            shift = fgc_256 if fg else bgc_256
+            return f"{shift};5;{code}"
+
+        if isinstance(code, (tuple, list)) and len(code) == 3:
             for c in code:
                 if not 0 <= c <= 255:
-                    raise Exception('Invalid color "%s"' % code)
+                    raise ValueError(f'Invalid color "{code}"')
 
             r, g, b = code
-            shift = FG_256 if fg else BG_256
-            return str(shift) + ";2;%d;%d;%d" % (int(r), int(g), int(b))
+            shift = fgc_256 if fg else bgc_256
+            return f"{shift};2;{r};{g};{b}"
 
-        raise Exception('Invalid color "%s"' % code)
+        raise ValueError(f'Invalid color "{code}"')
 
     @staticmethod
     def get_style_code(code):
+        """Return the ANSI code for a style.
+
+        Parameters
+        ----------
+        code : str
+            The style code. It must be one of the following:
+            ``bold``, ``dim``, ``italic``, ``underline``, ``blink``,
+            ``blink-fast``, ``inverse``, ``conceal``, ``strikethrough``.
+        """
         if code in STYLES:
             return str(1 + STYLES.index(code))
-        raise Exception('Invalid style "%s"' % code)
+        raise ValueError(f'Invalid style "{code}"')
 
     @staticmethod
     def to_ansi(codes):
-        return "\x1b[" + ";".join(codes) + "m"
+        """Return the ANSI escape sequence for a list of codes.
+
+        Parameters
+        ----------
+        codes : list
+            A list of ANSI codes.
+        """
+        codes = ";".join(codes)
+        return f"\x1b[{codes}m"
 
     NONE = "0"
     RESET = to_ansi.__func__(NONE)
-
-
-from .functional import npartial
 
 
 class ANSITranslator(nodes.NodeVisitor):
@@ -111,7 +142,10 @@ class ANSITranslator(nodes.NodeVisitor):
         self.lines = [""]
         self.line = 0
         self.indent_width = 2
-        self.termsize = termsize or get_terminal_size((80, 20))
+        try:
+            self.termsize = termsize or get_terminal_size()
+        except OSError:
+            self.termsize = (80, 24)
         self.options = options
         self.references = []
         self.refcount = 0
@@ -130,7 +164,9 @@ class ANSITranslator(nodes.NodeVisitor):
     def pop_ctx(self):
         self.ctx = self.ctx_stack.pop()
 
-    def push_style(self, fg=None, bg=None, styles=[]):
+    def push_style(self, fg=None, bg=None, styles=None):
+        if styles is None:
+            styles = []
         self.style_stack.append(self.style)
         self.style = deepcopy(self.style)
         if fg:
@@ -159,7 +195,7 @@ class ANSITranslator(nodes.NodeVisitor):
             self.lines[self.line] += " " * self.ctx.indent_level * self.indent_width
 
         for a in args:
-            self.lines[self.line] += u(a)
+            self.lines[self.line] += a
 
     def newline(self, n=1):
         self.lines.extend([""] * n)
@@ -172,9 +208,9 @@ class ANSITranslator(nodes.NodeVisitor):
         self.line += n
 
     def popline(self):
-        l = self.lines.pop(self.line)
+        line = self.lines.pop(self.line)
         self.line -= 1
-        return l
+        return line
 
     def replaceline(self, newline, strict=True):
         if strict:
@@ -189,8 +225,8 @@ class ANSITranslator(nodes.NodeVisitor):
             self.line += len(lines)
             self.newline()
         else:
-            for l in lines:
-                self.append(l)
+            for line in lines:
+                self.append(line)
                 self.newline()
 
     def _restyle(self, reset=False):
@@ -231,14 +267,17 @@ class ANSITranslator(nodes.NodeVisitor):
 
         self.push_ctx(indent_level=self.ctx.indent_level + 1)
         for ref in self.references:
-            self.append("[%s]: <" % ref[0])
-            self.push_style(fg="cyan", styles=["underline"])
-            self.append(ref[1])
-            self.pop_style()
-            self.append(">")
-            self.newline()
+            self._print_references_inner(ref)
         self.references = []
         self.pop_ctx()
+
+    def _print_references_inner(self, ref):
+        self.append(f"[{ref[0]}]: <")
+        self.push_style(fg="cyan", styles=["underline"])
+        self.append(ref[1])
+        self.pop_style()
+        self.append(">")
+        self.newline()
 
     def depart_document(self, node):
         self._print_references()
@@ -297,10 +336,7 @@ class ANSITranslator(nodes.NodeVisitor):
         self.newline(2)
 
     def _get_uri(self, node):
-        uri = node.attributes.get("refuri", "")
-        if not uri:
-            uri = node.attributes.get("uri", "")
-        return uri
+        return node.attributes.get("refuri", "") or node.attributes.get("uri", "")
 
     def visit_reference(self, node):
         if self._get_uri(node) == node.astext().strip():
@@ -318,7 +354,7 @@ class ANSITranslator(nodes.NodeVisitor):
             ):
                 self.append(ref_to_unicode(self.refcount))
             else:
-                self.append(" [%s]" % self.refcount)
+                self.append(f" [{self.refcount}]")
             self.refcount += 1
 
     # Style nodes
@@ -373,7 +409,7 @@ class ANSITranslator(nodes.NodeVisitor):
 
     def visit_list_item(self, node):
         if self.ctx.list_counter:
-            self.append(str(self.ctx.list_counter) + ". ")
+            self.append(f"{str(self.ctx.list_counter)}. ")
             self.ctx.list_counter += 1
         else:
             self.append("• " if self.options["unicode"] else "* ")
@@ -431,11 +467,11 @@ class ANSITranslator(nodes.NodeVisitor):
     def depart_image(self, node):
         if type(node.parent) == nodes.figure:
             self.visit_reference(node)
-            self.append("[" + node.attributes.get("alt", "Image") + "]")
+            self.append(f"[{node.attributes.get('alt', 'Image')}]")
             self.depart_reference(node)
             self.newline()
         else:
-            self.append("[" + node.attributes.get("alt", "Image") + "]")
+            self.append(f"[{node.attributes.get('alt', 'Image')}]")
 
     def depart_caption(self, node):
         self.newline(2)

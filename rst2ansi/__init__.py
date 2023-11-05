@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-
 from docutils import core, nodes
 from docutils.parsers.rst import roles
 
@@ -31,7 +30,6 @@ from .visitor import Writer
 
 
 def rst2ansi(input_string, output_encoding="utf-8"):
-
     overrides = {}
     overrides["input_encoding"] = "unicode"
 
@@ -39,10 +37,10 @@ def rst2ansi(input_string, output_encoding="utf-8"):
         return [nodes.TextElement(rawtext, text, classes=[name])], []
 
     for color in COLORS:
-        roles.register_local_role("ansi-fg-" + color, style_role)
-        roles.register_local_role("ansi-bg-" + color, style_role)
+        roles.register_local_role(f"ansi-fg-{color}", style_role)
+        roles.register_local_role(f"ansi-bg-{color}", style_role)
     for style in STYLES:
-        roles.register_local_role("ansi-" + style, style_role)
+        roles.register_local_role(f"ansi-{style}", style_role)
 
     if hasattr(input_string, "decode"):
         input_string = input_string.decode("utf-8")

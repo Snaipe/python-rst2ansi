@@ -45,7 +45,7 @@ def wrap(text, width=80, subsequent_indent=""):
             lines.append([])
         while line_size + size - 1 > width:
             stripped = width - line_size - 1
-            lines[-1].append(w[:stripped] + "-")
+            lines[-1].append(f"{w[:stripped]}-")
             line_size = len(subsequent_indent)
             lines.append([])
             w = w[stripped:]

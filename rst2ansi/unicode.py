@@ -23,9 +23,6 @@ THE SOFTWARE.
 """
 
 
-import sys
-
-
 def num_to_superscript(n):
     sups = {
         "0": "\u2070",
@@ -43,17 +40,4 @@ def num_to_superscript(n):
 
 
 def ref_to_unicode(n):
-    return "⁽" + num_to_superscript(n) + "⁾"
-
-
-def u(s):
-    # Useful for very coarse version differentiation.
-    PY3 = sys.version_info[0] == 3
-    if PY3:
-        return s
-    # Workaround for standalone backslash
-    try:
-        ret_s = s.replace(r"\\", r"\\\\").encode("unicode_escape")
-    except TypeError:
-        ret_s = s.replace(r"\\", r"\\\\")
-    return ret_s
+    return f"⁽{num_to_superscript(n)}⁾"
