@@ -465,7 +465,7 @@ class ANSITranslator(nodes.NodeVisitor):
     # Misc
 
     def depart_image(self, node):
-        if type(node.parent) == nodes.figure:
+        if isinstance(node.parent, nodes.figure):
             self.visit_reference(node)
             self.append(f"[{node.attributes.get('alt', 'Image')}]")
             self.depart_reference(node)

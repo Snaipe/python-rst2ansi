@@ -22,8 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from docutils import core, nodes
 from docutils.parsers.rst import roles
+
+from docutils import core, nodes
 
 from .ansi import COLORS, STYLES
 from .visitor import Writer

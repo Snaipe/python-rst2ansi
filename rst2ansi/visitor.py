@@ -22,8 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from docutils import writers
 from docutils.transforms import writer_aux
+
+from docutils import writers
 
 from .ansi import ANSITranslator
 
