@@ -24,7 +24,6 @@ THE SOFTWARE.
 """
 
 from docutils import core, frontend, nodes, utils, writers, languages, io
-from docutils.utils.error_reporting import SafeString
 from docutils.transforms import writer_aux
 from docutils.parsers.rst import roles
 
