@@ -2,10 +2,7 @@
 
 import os
 import sys
-try:
-  from setuptools import setup
-except ImportError:
-  from distutils.core import setup
+from setuptools import setup
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -21,8 +18,10 @@ setup(
   keywords="rst restructuredtext ansi console code converter",
   url="https://github.com/Snaipe/python-rst-to-ansi",
   packages=['rst2ansi'],
-  requires=['docutils'],
-  scripts=['bin/rst2ansi'],
+  install_requires=['docutils'],
+  entry_points = {
+    'console_scripts': ['rst2ansi=rst2ansi.__main__:main'],
+  },
   data_files=[],
   classifiers=[
     "Development Status :: 4 - Beta",
